@@ -14,12 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SpielBearbeitenActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".ErgebnisHinzufuegenActivity" />
-        <activity android:name=".DatePickerActivity" />
-        <activity android:name=".TimePickerActivity" />
-        <activity android:name=".SpielHinzufuegenActivity"></activity>
+        <activity android:name=".SpielActivity" />
     </application>
 
 </manifest>
