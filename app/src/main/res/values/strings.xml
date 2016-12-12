@@ -41,8 +41,8 @@
     <string name="action_logout">Logout</string>
 
     <string name="spiel_bearbeiten">Spiel bearbeiten</string>
-    <string name="heim">Heim:</string>
-    <string name="gast">Gast:</string>
+    <string name="heim">Heim:\u0020\u0020\u0020</string>
+    <string name="gast">Gast:\u0020\u0020\u0020</string>
     <string name="datum">Datum:</string>
     <string name="uhrzeit">Uhrzeit:</string>
     <string name="ergebnis">Ergebnis</string>
@@ -52,6 +52,9 @@
     <string name="spielstand">Spielstand:</string>
     <string name="spielstand_doppelpunkt">:</string>
     <string name="button_cancel">abbrechen</string>
+    <string name="button_delete">löschen</string>
     <string name="button_ok">OK</string>
+
+
 
 </resources>

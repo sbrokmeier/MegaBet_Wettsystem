@@ -45,17 +45,17 @@
                 android:text="@string/heim"
                 android:id="@+id/textViewHeim"
                 android:textIsSelectable="false"
-                android:textAllCaps="false"
-                android:textAlignment="center" />
+                android:textAllCaps="false" />
 
             <EditText
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
+                android:layout_weight="3"
                 android:inputType="text"
                 android:id="@+id/editTextHeim"
-                android:textAlignment="center"
-                 />
+                android:textAlignment="textStart"
+                android:layout_width="wrap_content"
+                android:textSize="18sp" />
+            <!--android:layout_weight="4" -->
 
             </LinearLayout>
 
@@ -71,15 +71,17 @@
             android:inputType="text"
             android:text="@string/gast"
             android:id="@+id/TextViewGast"
-            android:textAlignment="center" />
+            android:textAlignment="textStart" />
 
         <EditText
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="4"
             android:inputType="text"
+            android:layout_weight="3"
             android:id="@+id/editTextGast"
-            android:textAlignment="center" />
+            android:textAlignment="textStart"
+            android:editable="false"
+            android:layout_width="wrap_content"
+            android:textSize="18sp" />
 
         </LinearLayout>
 
@@ -94,15 +96,15 @@
                 android:layout_weight="1"
                 android:text="@string/datum"
                 android:id="@+id/TextViewDatum"
-                android:textAlignment="center" />
+                android:textAlignment="textStart" />
 
             <EditText
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
+                android:layout_weight="3"
                 android:id="@+id/editTextDate"
-                android:textAlignment="center"
-                android:focusable="false" />
+                android:textAlignment="textStart"
+                android:focusable="false"
+                android:layout_width="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -116,15 +118,15 @@
                 android:layout_weight="1"
                 android:text="@string/uhrzeit"
                 android:id="@+id/textViewUhrzeit"
-                android:textAlignment="center" />
+                android:textAlignment="textStart" />
 
             <EditText
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
+                android:layout_weight="3"
                 android:id="@+id/editTextTime"
-                android:textAlignment="center"
-                android:focusable="false" />
+                android:textAlignment="textStart"
+                android:focusable="false"
+                android:layout_width="wrap_content" />
 
             <!-- android:focusable="false" => damit die Tastaur nich erscheint -->
 
@@ -211,7 +213,6 @@
             android:id="@+id/radioButton3" />
     </RadioGroup>
 
-
         <Space
             android:layout_width="match_parent"
             android:layout_height="15dp" />
@@ -228,6 +229,14 @@
                 android:id="@+id/ButtonAbbrechen"
                 android:layout_weight="1"
                 android:onClick="onClickCancel" />
+
+            <Button
+                android:text="@string/button_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ButtonLoeschen"
+                android:layout_weight="1"
+                android:onClick="onClickDelete" />
 
             <Button
                 android:text="@string/button_ok"

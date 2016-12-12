@@ -11,8 +11,8 @@ public class Spiel implements Comparable<Spiel> {
     private String datum;
     private String uhrzeit;
     private int ergebnis;
-    private int tore_heim;
-    private int tore_gast;
+    private String toreHeim;
+    private String toreGast;
     private long dbIndex;
 
     public void setHeim(String heim) {
@@ -55,6 +55,27 @@ public class Spiel implements Comparable<Spiel> {
         return uhrzeit;
     }
 
+    public void setToreHeim(String toreHeim) {
+
+        this.toreHeim = toreHeim;
+    }
+
+    public String getToreHeim() {
+
+        return toreHeim;
+    }
+
+
+    public void setToreGast (String toreGast) {
+
+        this.toreGast = toreGast;
+    }
+
+    public String getToreGast() {
+
+        return toreGast;
+    }
+
     public void setErgebnis(int ergebnis) {
 
         this.ergebnis = ergebnis;
@@ -71,32 +92,78 @@ public class Spiel implements Comparable<Spiel> {
     }
 
 
-    public Spiel(String datum, String uhrzeit, long dbIndex){
+    public Spiel(String datum, String uhrzeit, String heim, String gast, String toreHeim, String toreGast, long dbIndex){
         this.datum = datum;
         this.uhrzeit = uhrzeit;
         this.heim = heim;
         this.gast = gast;
         this.ergebnis = ergebnis;
-        this.tore_heim = tore_heim;
-        this.tore_gast = tore_gast;
+        this.toreHeim = toreHeim;
+        this.toreGast = toreGast;
         this.dbIndex = dbIndex;
     }
 
-    public Spiel(String heim, String gast) {
 
-        this(heim, gast, -1l);
+    public Spiel(String datum, String uhrzeit, String heim, String gast, String toreHeim, String toreGast) {
+
+        this(datum, uhrzeit, heim, gast, toreHeim, toreGast, -1l);
+    }
+
+    public Spiel(String datum, String uhrzeit, String heim, String gast, long dbIndex){
+        this.datum = datum;
+        this.uhrzeit = uhrzeit;
+        this.heim = heim;
+        this.gast = gast;
+        this.ergebnis = ergebnis;
+        this.toreHeim = toreHeim;
+        this.toreGast = toreGast;
+        this.dbIndex = dbIndex;
+    }
+
+
+    public Spiel(String datum, String uhrzeit, String heim, String gast) {
+
+        this(datum, uhrzeit, heim, gast, -1l);
+    }
+
+    /*
+    public Spiel(String datum, String uhrzeit, String heim, String gast){
+        this.datum = datum;
+        this.uhrzeit = uhrzeit;
+        this.heim = heim;
+        this.gast = gast;
+        this.ergebnis = ergebnis;
+        this.toreHeim = toreHeim;
+        this.toreGast = toreGast;
+        this.dbIndex = dbIndex;
+    }
+    */
+
+    public Spiel(String datum, String uhrzeit, String heim, String gast, int ergebnis, String toreHeim, String toreGast, long dbIndex){
+        this.datum = datum;
+        this.uhrzeit = uhrzeit;
+        this.heim = heim;
+        this.gast = gast;
+        this.ergebnis = ergebnis;
+        this.toreHeim = toreHeim;
+        this.toreGast = toreGast;
+        this.dbIndex = dbIndex;
     }
 
 
     @Override
     public int compareTo(Spiel spiel) {
-        return this.heim.compareTo(spiel.getHeim());
+        return this.datum.compareTo(spiel.getDatum());
+    }
+
+    public String toString1() {
+        return datum + " " + uhrzeit + " " +  heim + " - " + gast;
     }
 
     @Override
     public String toString() {
 
-        return datum + uhrzeit + heim + gast + ergebnis;
+        return datum + " " + uhrzeit + " " +  heim + " - " + gast + " " + toreHeim + ":" + toreGast;
     }
 
 }

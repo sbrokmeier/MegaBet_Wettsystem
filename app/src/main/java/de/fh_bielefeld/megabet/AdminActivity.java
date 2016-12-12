@@ -10,13 +10,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
-import static de.fh_bielefeld.megabet.R.string.gast;
-import static de.fh_bielefeld.megabet.R.string.heim;
-
 
 public class AdminActivity extends AppCompatActivity {
 
@@ -26,17 +23,20 @@ public class AdminActivity extends AppCompatActivity {
     // Um die Tabelle aus der ganzen Klasse heraus updaten zu können
     ArrayAdapter<Spiel> adapter;
 
-    // Tabelle der Personen
+    // Tabelle der Spiele
     ArrayList<Spiel> spiele = new ArrayList<Spiel>();
 
     // Datenbank-Adapter
     private SpielAdapter mDbHelper;
 
-    // Neuer Eintrag oder bearbeiten
+    // Neuer Eintrag oder bearbeiten?
     public final static String EXTRA_NEW_ENTRY = "new_entry";
 
-    // Detaildialog mit OK beendet?
+    // SpielActivity mit OK beendet?
     public final static String EXTRA_DATA_COMMITTED = "data_committed";
+
+    // SpielActivity mit Löschen beendet?
+    public final static String EXTRA_TO_BE_DELETED = "to_be_deleted";
 
     // Index des bearbeiteten Eintrags (im Array = in Tabelle)
     public final static String EXTRA_ARRAY_INDEX = "array_index";
@@ -45,6 +45,8 @@ public class AdminActivity extends AppCompatActivity {
     public final static String EXTRA_GAST= "gast";
     public final static String EXTRA_DATUM  = "datum";
     public final static String EXTRA_UHRZEIT= "uhrzeit";
+    public final static String EXTRA_TOREHEIM  = "toreHeim";
+    public final static String EXTRA_TOREGAST= "toreGast";
 
 
     @Override
@@ -52,11 +54,10 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
-        // öffne Datenbank und lese Daten aus
+        // Datenbank öffnen undDaten lesen
         mDbHelper = new SpielAdapter(this);
         fillData();
 
-        //loadTestData();
         createTableView();
     }
 
@@ -72,14 +73,15 @@ public class AdminActivity extends AppCompatActivity {
             long itemId = cursor.getLong(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_ROWID));
             String heim = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_HEIM));
             String gast = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_GAST));
-            Log.e("DATABASE", "Eintrag ID " + itemId + " mit Heim = " + heim + " und Gast = " + gast + " gelesen.");
-            spiele.add(new Spiel(heim, gast, itemId));
+            String datum = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.DATUM));
+            String uhrzeit = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.UHRZEIT));
+            Log.e("DATABASE", "Eintrag ID " + itemId + " mit Heim = " + heim + " und Gast = " + gast + " am " + datum + " um " + uhrzeit + " gelesen.");
+            spiele.add(new Spiel(datum, uhrzeit, heim, gast));
             cursor.moveToNext();
         }
         mDbHelper.close();
         Collections.sort(spiele);
     }
-
 
     //Button SPIEL HINZUFÜGEN
     public void onClickSpielHinzufuegen(View view) {
@@ -91,12 +93,6 @@ public class AdminActivity extends AppCompatActivity {
         intent.putExtras(bundle);
 
         startActivityForResult(intent, 0);
-
-    }
-
-    private void loadTestData() {
-        spiele.add(new Spiel("S04", "BVB"));
-        spiele.add(new Spiel("BCS", "FCB"));
     }
 
     @Override
@@ -109,22 +105,54 @@ public class AdminActivity extends AppCompatActivity {
 
             boolean dataCommitted = bundle.getBoolean(EXTRA_DATA_COMMITTED);
             boolean newEntry = bundle.getBoolean(EXTRA_NEW_ENTRY);
+            boolean toBeDeleted = bundle.getBoolean(EXTRA_TO_BE_DELETED);
 
-
-            if(dataCommitted)
+            if(toBeDeleted)
             {
+                int arrayIndex = bundle.getInt(EXTRA_ARRAY_INDEX);
+                if( arrayIndex >= 0 && arrayIndex <= spiele.size()-1 )
+                {
+
+                    // Spiel direkt in ArrayList löschen
+                    //spiele.remove(arrayIndex);
+
+                    // Spiel in Datenbank löschen
+                    long dbIndex = spiele.get(arrayIndex).getDbIndex();
+
+                    mDbHelper.open();
+                    boolean success = mDbHelper.deleteSpiel(dbIndex);
+                    Log.e("DATABASE", "Datensatz mit dbIndex " + dbIndex + " wurde gelöscht");
+                    if(success)
+                        Log.e("DATABASE", "Löschen war erfolgreich");
+                    else
+                        Log.e("DATABASE", "Fehler beim Löschen");
+                    fillData();
+                    mDbHelper.close();
+                }
+                else
+                    Log.e("DATABASE", " Delete: Index out of bounds: " + arrayIndex);
+
+                adapter.notifyDataSetChanged();
+            }
+
+            if(!toBeDeleted && dataCommitted)
+            {
+                String datum = bundle.getString(EXTRA_DATUM);
+                String uhrzeit = bundle.getString(EXTRA_UHRZEIT);
                 String heim = bundle.getString(EXTRA_HEIM);
                 String gast = bundle.getString(EXTRA_GAST);
+                String toreHeim = bundle.getString(EXTRA_TOREHEIM);
+                String toreGast = bundle.getString(EXTRA_TOREGAST);
+
 
                 if(newEntry) {
-                    /* Neuen Eintrag anlegen direkt in ArrayList
-
-                    personen.add(new Person(name, alter));
-                    Collections.sort(personen); */
+                    // Neuen Eintrag anlegen direkt in ArrayList
+                    spiele.add(new Spiel(heim, gast, datum, uhrzeit, toreHeim, toreGast));
+                    Collections.sort(spiele);
 
                     // Neuen Eintrag anlegen in Datenbank
                     mDbHelper.open();
-                    Spiel newSpiel = new Spiel(heim, gast);
+                    Spiel newSpiel = new Spiel(datum, uhrzeit, heim, gast, toreHeim, toreGast);
 
                     long newRowId = mDbHelper.createSpiel(newSpiel);
 
@@ -136,12 +164,15 @@ public class AdminActivity extends AppCompatActivity {
                 }
                 else {
                     // Eintrag bearbeiten
-
                     int arrayIndex = bundle.getInt(EXTRA_ARRAY_INDEX);
                     if( arrayIndex >= 0 && arrayIndex <= spiele.size()-1 ) {
                         Spiel spiel = spiele.get(arrayIndex);
                         spiel.setHeim(heim);
                         spiel.setGast(gast);
+                        spiel.setDatum(datum);
+                        spiel.setUhrzeit(uhrzeit);
+                        spiel.setToreHeim(toreHeim);
+                        spiel.setToreGast(toreGast);
 
                         // Update Database
                         mDbHelper.open();
@@ -168,12 +199,14 @@ public class AdminActivity extends AppCompatActivity {
         spieleListe.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Toast.makeText(getApplicationContext(), "Click ListItem Number " + position, Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(context, AdminActivity.class);
+
+                Intent intent = new Intent(context, SpielActivity.class);
 
                 // Übergabe der Werte für die Bearbeiten-Funktion
                 Bundle bundle = new Bundle();
                 bundle.putBoolean(EXTRA_NEW_ENTRY, false);
+                bundle.putString(EXTRA_DATUM, spiele.get(position).getDatum());
+                bundle.putString(EXTRA_UHRZEIT, spiele.get(position).getUhrzeit());
                 bundle.putString(EXTRA_HEIM, spiele.get(position).getHeim());
                 bundle.putString(EXTRA_GAST, spiele.get(position).getGast());
                 bundle.putInt(EXTRA_ARRAY_INDEX, position);
@@ -182,32 +215,8 @@ public class AdminActivity extends AppCompatActivity {
                 startActivityForResult(intent, 0);
             }
         });
-    }
-
-
-
-
-
-
-
-
-/*
-
-    // Button SPIEL HINZUFÜGEN
-    public void onClickSpielHinzufuegen(View view) {
-        Intent intent = new Intent(this, SpielBearbeitenActivity.class);
-
-        // Übergabe der Werte für die Bearbeiten-Funktion
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(EXTRA_NEW_ENTRY, true);
-        intent.putExtras(bundle);
-
-        startActivity(intent);
 
     }
-
-*/
-
 }
 
 

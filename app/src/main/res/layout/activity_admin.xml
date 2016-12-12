@@ -41,7 +41,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:id="@+id/spieleListView" />
+            android:id="@+id/spieleListView"
+            android:textAlignment="textStart"
+            android:textFilterEnabled="false" />
+
 
 
         <!--
@@ -49,12 +52,6 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="150dp">
-
-
-
-
-
-
 
 
 
@@ -91,8 +88,6 @@
                     android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"/>
 
             </LinearLayout>
-
-
             -->
 
 
@@ -111,6 +106,18 @@
                 android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
             android:textAlignment="center" />
 
+
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/offeneSpieleListView"
+            android:textAlignment="textStart"
+            android:textFilterEnabled="false" />
+
+
+        <!--
         <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -136,10 +143,9 @@
             android:layout_weight="0.39" />
 
 
-
-
-
     </LinearLayout>
+
+    -->
 
         <Button
             android:text="Spiel hinzufügen"
