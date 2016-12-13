@@ -29,7 +29,7 @@ public class AdminActivity extends AppCompatActivity {
     // Datenbank-Adapter
     private SpielAdapter mDbHelper;
 
-    // Neuer Eintrag oder bearbeiten?
+    // neues Spiel hinzufügen oder vorhandenes Spiel bearbeiten?
     public final static String EXTRA_NEW_ENTRY = "new_entry";
 
     // SpielActivity mit OK beendet?
@@ -54,7 +54,7 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
-        // Datenbank öffnen undDaten lesen
+        // Datenbank-Adapter öffnen und Daten lesen
         mDbHelper = new SpielAdapter(this);
         fillData();
 
@@ -66,20 +66,24 @@ public class AdminActivity extends AppCompatActivity {
 
         // Array leeren
         spiele.removeAll(spiele);
+
         Cursor cursor = mDbHelper.fetchAllSpiele();
 
         cursor.moveToFirst();
         while(!cursor.isAfterLast()) {
             long itemId = cursor.getLong(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_ROWID));
-            String heim = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_HEIM));
-            String gast = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.KEY_GAST));
+            String heim = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.HEIM));
+            String gast = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.GAST));
             String datum = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.DATUM));
             String uhrzeit = cursor.getString(cursor.getColumnIndexOrThrow(SpielAdapter.UHRZEIT));
             Log.e("DATABASE", "Eintrag ID " + itemId + " mit Heim = " + heim + " und Gast = " + gast + " am " + datum + " um " + uhrzeit + " gelesen.");
             spiele.add(new Spiel(datum, uhrzeit, heim, gast));
             cursor.moveToNext();
         }
+
+        //Datenbank-Adapter schließen
         mDbHelper.close();
+
         Collections.sort(spiele);
     }
 
@@ -120,6 +124,7 @@ public class AdminActivity extends AppCompatActivity {
                     long dbIndex = spiele.get(arrayIndex).getDbIndex();
 
                     mDbHelper.open();
+
                     boolean success = mDbHelper.deleteSpiel(dbIndex);
                     Log.e("DATABASE", "Datensatz mit dbIndex " + dbIndex + " wurde gelöscht");
                     if(success)
@@ -147,12 +152,12 @@ public class AdminActivity extends AppCompatActivity {
 
                 if(newEntry) {
                     // Neuen Eintrag anlegen direkt in ArrayList
-                    spiele.add(new Spiel(heim, gast, datum, uhrzeit, toreHeim, toreGast));
-                    Collections.sort(spiele);
+                    //spiele.add(new Spiel(heim, gast, datum, uhrzeit, toreHeim, toreGast));
+                    //Collections.sort(spiele);
 
                     // Neuen Eintrag anlegen in Datenbank
                     mDbHelper.open();
-                    Spiel newSpiel = new Spiel(datum, uhrzeit, heim, gast, toreHeim, toreGast);
+                    Spiel newSpiel = new Spiel(datum, uhrzeit, heim, gast);
 
                     long newRowId = mDbHelper.createSpiel(newSpiel);
 
@@ -192,11 +197,13 @@ public class AdminActivity extends AppCompatActivity {
 
     private void createTableView() {
 
-        final ListView spieleListe = (ListView) findViewById(R.id.spieleListView);
-        adapter = new ArrayAdapter<Spiel>(this, android.R.layout.simple_expandable_list_item_1, spiele);
-        spieleListe.setAdapter(adapter);
 
-        spieleListe.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //ListView für beendete Spiele (mit Ergebnis)
+        ListView beendeteSpieleListe = (ListView) findViewById(R.id.beendeteSpieleListView);
+        adapter = new ArrayAdapter<Spiel>(this, android.R.layout.simple_expandable_list_item_1, spiele);
+        beendeteSpieleListe.setAdapter(adapter);
+
+        beendeteSpieleListe.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -209,6 +216,34 @@ public class AdminActivity extends AppCompatActivity {
                 bundle.putString(EXTRA_UHRZEIT, spiele.get(position).getUhrzeit());
                 bundle.putString(EXTRA_HEIM, spiele.get(position).getHeim());
                 bundle.putString(EXTRA_GAST, spiele.get(position).getGast());
+                bundle.putString(EXTRA_TOREHEIM, spiele.get(position).getToreHeim());
+                bundle.putString(EXTRA_TOREGAST, spiele.get(position).getToreGast());
+                bundle.putInt(EXTRA_ARRAY_INDEX, position);
+                intent.putExtras(bundle);
+
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        //ListView für offene Spiele (ohne Ergebnis)
+        ListView offeneSpieleListe = (ListView) findViewById(R.id.offeneSpieleListView);
+        adapter = new ArrayAdapter<Spiel>(this, android.R.layout.simple_expandable_list_item_1, spiele);
+        offeneSpieleListe.setAdapter(adapter);
+
+        offeneSpieleListe.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent intent = new Intent(context, SpielActivity.class);
+
+                // Übergabe der Werte für die Bearbeiten-Funktion
+                Bundle bundle = new Bundle();
+                bundle.putBoolean(EXTRA_NEW_ENTRY, false);
+                bundle.putString(EXTRA_DATUM, spiele.get(position).getDatum());
+                bundle.putString(EXTRA_UHRZEIT, spiele.get(position).getUhrzeit());
+                bundle.putString(EXTRA_HEIM, spiele.get(position).getHeim());
+                bundle.putString(EXTRA_GAST, spiele.get(position).getGast());
+
                 bundle.putInt(EXTRA_ARRAY_INDEX, position);
                 intent.putExtras(bundle);
 
@@ -217,6 +252,7 @@ public class AdminActivity extends AppCompatActivity {
         });
 
     }
+
 }
 
 

@@ -14,13 +14,9 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.DatePicker;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import static de.fh_bielefeld.megabet.R.id.radioButton1;
-
 
 /**
  * Created by Sari on 04.12.16.
@@ -32,12 +28,12 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
     int arrayIndex;
     SpielAdapter mDbHelper;
 
-    String heim = "";
-    String gast = "";
+    String heim;
+    String gast;
     String datum;
     String uhrzeit;
-    String toreHeim = "";
-    String toreGast = "";
+    String toreHeim;
+    String toreGast;
 
     // Widget GUI
     EditText editTextHeim, editTextGast, editTextDate, editTextTime, editTextToreHeim, editTextToreGast;
@@ -59,33 +55,29 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         final Button ButtonOK = (Button) this.findViewById(R.id.ButtonOK);
         final Button ButtonLoeschen = (Button) this.findViewById(R.id.ButtonLoeschen);
         final Button ButtonAbbrechen = (Button) this.findViewById(R.id.ButtonAbbrechen);
+        final Button ButtonErgebnisSpeichern = (Button) this.findViewById(R.id.ButtonErgebnisSpeichern);
         final RadioButton radioButton1 = (RadioButton) this.findViewById(R.id.radioButton1);
         final RadioButton radioButton2 = (RadioButton) this.findViewById(R.id.radioButton2);
         final RadioButton radioButton3 = (RadioButton) this.findViewById(R.id.radioButton3);
 
-        //final EditText
         editTextHeim = (EditText) this.findViewById(R.id.editTextHeim);
-        //final EditText
         editTextGast = (EditText) this.findViewById(R.id.editTextGast);
 
         editTextDate = (EditText) findViewById(R.id.editTextDate);
         editTextTime = (EditText) findViewById(R.id.editTextTime);
-
         editTextToreHeim = (EditText) findViewById(R.id.editTextToreHeim);
         editTextToreGast = (EditText) findViewById(R.id.editTextToreGast);
 
-        //onClickLIstener für Date- und Time-Picker
+        //onClickListener für Date- und Time-Picker
         editTextDate.setOnClickListener(this);
         editTextTime.setOnClickListener(this);
-
 
         // aus dem Bundle auslesen, ob ein neuer Datensatz angelegt werden soll
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
         newEntry = bundle.getBoolean(AdminActivity.EXTRA_NEW_ENTRY);
-        //arrayIndex = -1;
-
+        arrayIndex = -1;
 
         // vorhandene Werte aus dem Bundle laden
         if(!newEntry)
@@ -94,6 +86,8 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
             gast = bundle.getString(AdminActivity.EXTRA_GAST);
             datum = bundle.getString(AdminActivity.EXTRA_DATUM);
             uhrzeit = bundle.getString(AdminActivity.EXTRA_UHRZEIT);
+            toreHeim = bundle.getString(AdminActivity.EXTRA_TOREHEIM);
+            toreGast = bundle.getString(AdminActivity.EXTRA_TOREGAST);
             arrayIndex = bundle.getInt(AdminActivity.EXTRA_ARRAY_INDEX);
         }
 
@@ -105,7 +99,6 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         editTextToreHeim.setText(toreHeim);
         editTextToreGast.setText(toreGast);
 
-
         // LÖSCHEN-Button nicht anzeigen, wenn ein neues Spiel hinzugefügt wird
         ButtonLoeschen.setVisibility(newEntry ? View.GONE : View.VISIBLE);
 
@@ -116,11 +109,17 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         radioButton2.setEnabled(newEntry ? false : true);
         radioButton3.setEnabled(newEntry ? false : true);
 
-        // Felder deaktivieren, wenn ein Spiel bearbeitet wird
+        //OK-Button (Ergebnis speichern) nicht anzeigen, wenn ein neues Spiel hinzugefügt wird
+        ButtonErgebnisSpeichern.setVisibility(newEntry ? View.VISIBLE : View.GONE);
+
+        // Felder deaktivieren, wenn ein Ergebnis hinzugefügt wird
         editTextHeim.setEnabled(newEntry ? true : false);
         editTextGast.setEnabled(newEntry ? true : false);
         editTextDate.setEnabled(newEntry ? true : false);
         editTextTime.setEnabled(newEntry ? true : false);
+
+        // OK-Button nicht anzeigen, wenn ein Ergbnis hinzugfügt wird
+        ButtonOK.setVisibility(newEntry ? View.GONE : View.VISIBLE);
     }
 
 
@@ -147,7 +146,6 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth ) {
 
-
                     /*
                     String dayString = "";
                     if (dayOfMonth < 10) {
@@ -170,7 +168,7 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
                     SimpleDateFormat datumFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.US);
                     String stringDate = datumFormat.format(newDate.getTime());
 
-                    // Display Selected date in textbox
+                    // ausgewähltes Datum im Textfeld anzeigen
                     editTextDate.setText(stringDate);
                     //editTextDate.setText(dayOfMonth + "." + (monthOfYear + 1) + "." + year);
                 }
@@ -186,7 +184,7 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
             mHour = c.get(Calendar.HOUR_OF_DAY);
             mMinute = c.get(Calendar.MINUTE);
 
-            // Launch Time Picker Dialog
+            // ime Picker Dialog öffnen
             TimePickerDialog tpd = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
 
                 @Override
@@ -206,7 +204,7 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
                         hourString = "" + hourOfDay;
                     }
 
-                    // Display Selected time in textbox
+                    // ausgewählte Uhrzeit im Textfeld anzeigen
                     editTextTime.setText(hourString + ":" + minuteString);
                 }
             }, mHour, mMinute, true);
@@ -215,21 +213,22 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    //Button OK neues Spiel hinzufügen (ohne Tore)
     public void onClickOK(View view) {
 
         final EditText editTextHeim = (EditText) this.findViewById(R.id.editTextHeim);
         final EditText editTextGast = (EditText) this.findViewById(R.id.editTextGast);
         final EditText editTextDate = (EditText) this.findViewById(R.id.editTextDate);
         final EditText editTextTime = (EditText) this.findViewById(R.id.editTextTime);
-        final EditText editTextToreHeim = (EditText) this.findViewById(R.id.editTextToreHeim);
-        final EditText editTextToreGast= (EditText) this.findViewById(R.id.editTextToreGast);
+        //final EditText editTextToreHeim = (EditText) this.findViewById(R.id.editTextToreHeim);
+        //final EditText editTextToreGast= (EditText) this.findViewById(R.id.editTextToreGast);
 
         heim = editTextHeim.getText().toString();
         gast = editTextGast.getText().toString();
         datum = editTextDate.getText().toString();
         uhrzeit = editTextTime.getText().toString();
-        toreHeim = editTextToreHeim.getText().toString();
-        toreGast = editTextToreGast.getText().toString();
+        //toreHeim = editTextToreHeim.getText().toString();
+        //toreGast = editTextToreGast.getText().toString();
 
         Intent intent = new Intent();
         Bundle rueckgabe = new Bundle();
@@ -241,8 +240,8 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         rueckgabe.putString(AdminActivity.EXTRA_GAST, gast);
         rueckgabe.putString(AdminActivity.EXTRA_DATUM, datum);
         rueckgabe.putString(AdminActivity.EXTRA_UHRZEIT, uhrzeit);
-        rueckgabe.putString(AdminActivity.EXTRA_TOREHEIM, toreHeim);
-        rueckgabe.putString(AdminActivity.EXTRA_TOREGAST, toreGast);
+        //rueckgabe.putString(AdminActivity.EXTRA_TOREHEIM, toreHeim);
+        //rueckgabe.putString(AdminActivity.EXTRA_TOREGAST, toreGast);
         rueckgabe.putInt(AdminActivity.EXTRA_ARRAY_INDEX, arrayIndex);
 
         intent.putExtras(rueckgabe);
@@ -278,6 +277,44 @@ public class SpielActivity extends AppCompatActivity implements View.OnClickList
         rueckgabe.putString(AdminActivity.EXTRA_GAST, "");
         rueckgabe.putString(AdminActivity.EXTRA_DATUM, "");
         rueckgabe.putString(AdminActivity.EXTRA_UHRZEIT, "");
+
+        intent.putExtras(rueckgabe);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+
+    //Ergebnis hinzufügen
+    public void onClickErgebnisSpeichern(View view) {
+
+        final EditText editTextHeim = (EditText) this.findViewById(R.id.editTextHeim);
+        final EditText editTextGast = (EditText) this.findViewById(R.id.editTextGast);
+        final EditText editTextDate = (EditText) this.findViewById(R.id.editTextDate);
+        final EditText editTextTime = (EditText) this.findViewById(R.id.editTextTime);
+        final EditText editTextToreHeim = (EditText) this.findViewById(R.id.editTextToreHeim);
+        final EditText editTextToreGast= (EditText) this.findViewById(R.id.editTextToreGast);
+
+
+        heim = editTextHeim.getText().toString();
+        gast = editTextGast.getText().toString();
+        datum = editTextDate.getText().toString();
+        uhrzeit = editTextTime.getText().toString();
+        toreHeim = editTextToreHeim.getText().toString();
+        toreGast = editTextToreGast.getText().toString();
+
+        Intent intent = new Intent();
+        Bundle rueckgabe = new Bundle();
+
+        rueckgabe.putBoolean(AdminActivity.EXTRA_DATA_COMMITTED, true);
+        rueckgabe.putBoolean(AdminActivity.EXTRA_TO_BE_DELETED, false);
+        rueckgabe.putBoolean(AdminActivity.EXTRA_NEW_ENTRY, newEntry);
+        rueckgabe.putString(AdminActivity.EXTRA_HEIM, heim);
+        rueckgabe.putString(AdminActivity.EXTRA_GAST, gast);
+        rueckgabe.putString(AdminActivity.EXTRA_DATUM, datum);
+        rueckgabe.putString(AdminActivity.EXTRA_UHRZEIT, uhrzeit);
+        rueckgabe.putString(AdminActivity.EXTRA_TOREHEIM, toreHeim);
+        rueckgabe.putString(AdminActivity.EXTRA_TOREGAST, toreGast);
+        rueckgabe.putInt(AdminActivity.EXTRA_ARRAY_INDEX, arrayIndex);
 
         intent.putExtras(rueckgabe);
         setResult(RESULT_OK, intent);

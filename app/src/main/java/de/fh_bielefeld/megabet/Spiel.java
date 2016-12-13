@@ -11,8 +11,8 @@ public class Spiel implements Comparable<Spiel> {
     private String datum;
     private String uhrzeit;
     private int ergebnis;
-    private String toreHeim;
-    private String toreGast;
+    private String toreHeim = "";
+    private String toreGast = "";
     private long dbIndex;
 
     public void setHeim(String heim) {
@@ -66,7 +66,7 @@ public class Spiel implements Comparable<Spiel> {
     }
 
 
-    public void setToreGast (String toreGast) {
+    public void setToreGast(String toreGast) {
 
         this.toreGast = toreGast;
     }
@@ -92,7 +92,8 @@ public class Spiel implements Comparable<Spiel> {
     }
 
 
-    public Spiel(String datum, String uhrzeit, String heim, String gast, String toreHeim, String toreGast, long dbIndex){
+    //Konstruktor mit allen Werten
+    public Spiel(String datum, String uhrzeit, String heim, String gast, String toreHeim, String toreGast, long dbIndex) {
         this.datum = datum;
         this.uhrzeit = uhrzeit;
         this.heim = heim;
@@ -109,7 +110,8 @@ public class Spiel implements Comparable<Spiel> {
         this(datum, uhrzeit, heim, gast, toreHeim, toreGast, -1l);
     }
 
-    public Spiel(String datum, String uhrzeit, String heim, String gast, long dbIndex){
+    //Konstruktor ohne Tore
+    public Spiel(String datum, String uhrzeit, String heim, String gast, long dbIndex) {
         this.datum = datum;
         this.uhrzeit = uhrzeit;
         this.heim = heim;
@@ -139,7 +141,7 @@ public class Spiel implements Comparable<Spiel> {
     }
     */
 
-    public Spiel(String datum, String uhrzeit, String heim, String gast, int ergebnis, String toreHeim, String toreGast, long dbIndex){
+    public Spiel(String datum, String uhrzeit, String heim, String gast, int ergebnis, String toreHeim, String toreGast, long dbIndex) {
         this.datum = datum;
         this.uhrzeit = uhrzeit;
         this.heim = heim;
@@ -156,15 +158,16 @@ public class Spiel implements Comparable<Spiel> {
         return this.datum.compareTo(spiel.getDatum());
     }
 
-    public String toString1() {
-        return datum + " " + uhrzeit + " " +  heim + " - " + gast;
-    }
 
+    //toString für offene Spiele (ohne Tore)
     @Override
     public String toString() {
+        return datum + "  " + uhrzeit + "  " + heim + " - " + gast;
+    }
 
-        return datum + " " + uhrzeit + " " +  heim + " - " + gast + " " + toreHeim + ":" + toreGast;
+    //toString für beendete Spiele mit Ergebnis
+    public String toString(boolean addTore) {
+        return datum + "  " + uhrzeit + "  " + heim + " - " + gast + " " + toreHeim + ":" + toreGast;
     }
 
 }
-
